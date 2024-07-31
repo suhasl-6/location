@@ -14,50 +14,53 @@
 <body>
 <div id="map"></div>
 
-<script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js"></script>
+<script type="module">
+  // Import the required Firebase modules
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.1.1/firebase-database.js";
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCEd_Ptex_mFgrBUpnZs31zDMtoTD7VBwo",
+    databaseURL: "https://women-safety-d5e85-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    projectId: "women-safety-d5e85",
+    messagingSenderId: "329291030734",
+    appId: "1:329291030734:android:9d41d4ebc4332da43df09f"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+
+  // Initialize the map
+  var map = L.map('map').setView([0, 0], 2); // Initial map view set to [0, 0] with zoom level 2
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  var marker;
+
+  // Function to update the map with the current location
+  function updateMap(lat, lng) {
+    if (marker) {
+      map.removeLayer(marker);
+    }
+    marker = L.marker([lat, lng]).addTo(map);
+    map.setView([lat, lng], 15); // Adjust zoom level as needed
+  }
+
+  // Read location data from Firebase
+  const locationRef = ref(database, 'locations/current_location');
+  onValue(locationRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const lat = data.latitude;
+      const lng = data.longitude;
+      updateMap(lat, lng);
+    }
+  });
+</script>
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-        // Your web app's Firebase configuration
-        var firebaseConfig = {
-            apiKey: "AIzaSyCEd_Ptex_mFgrBUpnZs31zDMtoTD7VBwo",
-            databaseURL: "https://women-safety-d5e85-default-rtdb.asia-southeast1.firebasedatabase.app/",
-            projectId: "women-safety-d5e85",
-            messagingSenderId: "329291030734",
-            appId: "1:329291030734:android:9d41d4ebc4332da43df09f"
-        };
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        var database = firebase.database();
-
-        // Initialize the map
-        var map = L.map('map').setView([0, 0], 2); // Initial map view set to [0, 0] with zoom level 2
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-
-        var marker;
-
-        // Function to update the map with the current location
-        function updateMap(lat, lng) {
-            if (marker) {
-                map.removeLayer(marker);
-            }
-            marker = L.marker([lat, lng]).addTo(map);
-            map.setView([lat, lng], 15); // Adjust zoom level as needed
-        }
-
-        // Read location data from Firebase
-        var locationRef = database.ref('locations/current_location');
-        locationRef.on('value', function(snapshot) {
-            var data = snapshot.val();
-            if (data) {
-                var lat = data.latitude;
-                var lng = data.longitude;
-                updateMap(lat, lng);
-            }
-        });
-    </script>
 </body>
 </html>
